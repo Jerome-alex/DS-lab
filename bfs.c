@@ -1,146 +1,105 @@
 #include<stdio.h>
-#include<stdlib.h>
-#include<stdbool.h>
 
-#define MAX 10
+#define MAX_SIZE 100
 
-int vertex_count =0;
-
-struct vertex{
-	char data;
-	bool visited;
-};
-struct vertex *graph[MAX];
-int adj_matrix[MAX][MAX];
-int queue[MAX];
-int rear=-1;
-int front=0;
-int queue_count=0;
+int n;
+int graph[MAX_SIZE][MAX_SIZE];
+int visited[MAX_SIZE];
+int nodevalues[MAX_SIZE];
+int front = -1, rear = -1;
+int queue[MAX_SIZE];
 
 void enqueue(int data){
-	queue[++rear]=data;
-	queue_count++;
+if(rear == n - 1){
+printf("Queue is full");
+} else if(front == -1 && rear == -1){
+front = 0;
+rear = 0;
+queue[rear] = data;
+} else {
+rear++;
+queue[rear] = data;
+}
 }
 
-int dequeue(){
-	queue_count--;
-	return queue[front++];
+void dequeue(){
+if(front == -1 && rear == -1){
+printf("Queue is empty \n");
+} else if(front == rear){
+//printf("The deleted element is : %d \n",queue[front]);
+front = -1;
+rear = -1;
+} else {
+//printf("The deleted element is : %d \n",queue[front]);
+front++;
+}
 }
 
-bool is_queue_empty(){
-	return queue_count == 0;
-}
-void add_vertex(char data){
-	struct vertex *new = (struct vertex*)malloc(sizeof(struct vertex));
-	new->data = data;
-	new->visited = false;
-	graph[vertex_count]=new;
-	vertex_count++;
-}
+int bfs(int startIndex){
+visited[startIndex] = 1;
+enqueue(startIndex);
 
-void add_edge(int start,int end){
-	adj_matrix[start][end]=1;
-	adj_matrix[end][start]=1;
+printf("The visited node is \t");
+while(front != -1){
+int node = queue[front];
+dequeue();
+printf("%d \t",nodevalues[node]);
+for(int i = 0; i < n; i++){
+if(graph[node][i] == 1 && visited[i] == 0){
+visited[i] = 1;
+enqueue(i);
+}	
 }
-
-int adj_vertex(int vertex_get){
-	int i;
-	for(i=0;i<vertex_count;i++){
-		if(adj_matrix[vertex_get][i] == 1 && graph[i]->visited == false){
-			return i;
-		}
-	}
-	return -1;
+}
+return 0;
 }
 
-void display_vertex(int pos){
-	printf("%c -> ",graph[pos]->data);
+void main(){
+
+printf("Enter the no: of nodes : \n");
+scanf("%d",&n);
+
+printf("Enter the values of each node : \n");
+for(int i= 0; i < n; i++){
+printf("Node %d : ", i + 1);
+scanf("%d",&nodevalues[i]);
 }
 
-void bfs(struct vertex *new,int start){
-	if(!new){
-		printf("\nNothing to display\n");
-		return;
-	}
-	    
-	int i;
-	int unvisited;
-	
-	printf("\n|||||||||||||||||||||||||||||||\n");
-	
-	new->visited =true;
-	display_vertex(start);
-	enqueue(start);
-	
-	while(!is_queue_empty()){
-		int pop_vertex = dequeue();
-		while((unvisited = adj_vertex(pop_vertex))!=-1){
-			graph[unvisited]->visited = true;
-			display_vertex(unvisited);
-			enqueue(unvisited);
-		}
-	}
-	printf("\n|||||||||||||||||||||||||||||||\n");
-	
-	for(i=0;i<vertex_count;i++){
-		graph[i]->visited = false;
-	}
+for(int i = 0; i < n; i++){
+visited[i] = 0;
 }
 
-void show(){
-	int i;
-	printf("\n.................................\n");
-	for(i=0;i<vertex_count;i++){
-		printf("Edge postion of '%c' is %d\n",graph[i]->data,i);
-	}
-	printf(".................................\n");
+printf("Enter 0 or 1 if there is an edge between the vertices \n");
+for(int i = 0; i < n; i++){
+for(int j = i + 1;j < n; j++){
+printf("is there an edge between node %d and node %d enter 1 else enter 0 :", nodevalues[i],nodevalues[j]);
+int edge;
+scanf("%d",&edge);
+
+if(edge == 1){
+graph[i][j] = graph[j][i] = 1;
+} else {
+graph[i][j] = graph[j][i] = 0;
+}
+}
 }
 
-int main(){
-	int opt;
-	char data;
-	int edge_1,edge_2;
-	int i, j;
-	int start;
+int startNode;
+printf("Enter the value of starting node : ");
+scanf("%d",&startNode);
 
-    for(i = 0; i < MAX; i++) 
-      for(j = 0; j < MAX; j++) 
-         adj_matrix[i][j] = 0;
-	
-	do{
-		printf("\n1)Add vertex \n2)Create edge \n3)Traversal \n0)Exit \nChoose option :: ");
-		scanf("%d",&opt);
-		switch(opt){
-			case 1:
-				printf("\nEnter data to be added to vertex : ");
-				scanf(" %c", &data);
-				add_vertex(data);
-				break;
-			case 2:
-	         	show();
-				printf("\nEnter edge starting : ");
-				scanf("%d",&edge_1);
-				printf("\nEnter edge ending : ");
-				scanf("%d",&edge_2);
-				if(vertex_count-1 < edge_1 || vertex_count-1 < edge_2){
-					printf("\nThere is no vertex !!\n");
-				}
-				else{
-					add_edge(edge_1,edge_2);
-				}
-				break;
-			case 3:
-				printf("\nEnter starting vertex position : ");
-				scanf("%d",&start);
-				bfs(graph[start],start);
-				break;
-			default:
-				printf("\nInvalid option try again !! ...");
-		}
-	}while(opt!=0);
-	
-	return 0;
+int startIndex = -1;
+
+for(int i = 0; i < n; i++){
+if(startNode == nodevalues[i]){
+startIndex = i;
+break;
+}
 }
 
+if(startIndex == -1){
+printf("invalid values you entered \n");
+}
 
-
+bfs(startIndex);
+}
